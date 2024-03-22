@@ -9,7 +9,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
         console.log("Event: ", event);
         const movieId = event.pathParameters?.movieId;
         const awardBody = event.pathParameters?.awardBody;
-
+        const min = event.queryStringParameters?.min;
         if (!movieId) {
             return {
                 statusCode: 400,
@@ -27,7 +27,10 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
                 ":movieId": parseInt(movieId),
             },
         };
-
+        if (min) {
+            queryInput.FilterExpression = "numAwards > :min";
+            queryInput.ExpressionAttributeValues[":min"] = parseInt(min);
+        }
         if (awardBody) {
             queryInput.KeyConditionExpression = "awardBody = :awardBody and movieId = :movieId";
             queryInput.ExpressionAttributeValues[":awardBody"] = awardBody;
@@ -42,7 +45,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
                 headers: {
                     "content-type": "application/json",
                 },
-                body: JSON.stringify({message: "No awardBody found for the given movieId"}),
+                body: JSON.stringify({message: "Request failed"}),
             };
         }
 
